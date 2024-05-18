@@ -1,0 +1,97 @@
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include "HX711.h"
+#define DOUT 32
+#define SCK 33
+HX711 scale;
+
+const char *ssid = "SATC IOT";
+const char *password = "IOT2023@";
+
+WebServer server(80);
+
+void handleRoot() {
+  char msg[1500];
+
+  snprintf(msg, 1500,
+           "<html>\
+  <head>\
+    <meta http-equiv='refresh' content='4'/>\
+    <meta name='viewport' content='width=device-width, initial-scale=1'>\
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' integrity='sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr' crossorigin='anonymous'>\
+    <title>ESP32 DHT Server</title>\
+    <style>\
+    html { font-family: Arial; display: inline-block; margin: 0px auto; text-align: center;}\
+    h2 { font-size: 3.0rem; }\
+    p { font-size: 3.0rem; }\
+    .units { font-size: 1.2rem; }\
+    .dht-labels{ font-size: 1.5rem; vertical-align:middle; padding-bottom: 15px;}\
+    </style>\
+  </head>\
+  <body>\
+      <h2>ESP32 DHT Server!</h2>\
+      <p>\
+        <i class='fas fa-thermometer-half' style='color:#ca3517;'></i>\
+        <span class='dht-labels'>Temperature</span>\
+        <span>%.2f</span>\
+        <sup class='units'>&deg;C</sup>\
+      </p>\
+      <p>\
+        <i class='fas fa-tint' style='color:#00add6;'></i>\
+        <span class='dht-labels'>Humidity</span>\
+        <span>%.2f</span>\
+        <sup class='units'>&percnt;</sup>\
+      </p>\
+  </body>\
+</html>", peso()
+          );
+  server.send(200, "text/html", msg);
+}
+
+void setup(void) {
+  Serial.begin(115200);
+  Serial.println("Balança HX711 com ESP32");
+
+  scale.begin(DOUT, SCK);
+  scale.set_offset(1779); 
+  scale.set_scale(-17604.61);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.println("");
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  if (MDNS.begin("esp32")) {
+    Serial.println("MDNS responder started");
+  }
+  server.on("/", handleRoot);
+
+  server.begin();
+  Serial.println("balança server started");
+}
+
+void loop(void) {
+  server.handleClient();
+  delay(2);//allow the cpu to switch to other tasks
+}
+
+float peso() {
+    float weight = scale.get_units(10); // Leitura média de 10 leituras
+    Serial.print("Peso: ");
+    Serial.print(weight, 2); // Exibe duas casas decimais
+    Serial.println(" kg");
+    delay(1000); // Aguarde 1 segundo antes de fazer a próxima leitura
+}
