@@ -1,0 +1,27 @@
+#include "HX711.h"
+
+// Defina os pinos do HX711
+#define DOUT 32
+#define SCK 33
+
+HX711 scale;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Balança HX711 com ESP32");
+
+  scale.begin(DOUT, SCK);
+  scale.set_offset(1779); 
+  scale.set_scale(-17604.61);       // Configure o valor de tara (zero) do sensor
+}
+
+void loop() {
+  // Leia o peso do sensor HX711
+  float weight = scale.get_units(10); // Leitura média de 10 leituras
+
+  Serial.print("Peso: ");
+  Serial.print(weight, 2); // Exibe duas casas decimais
+  Serial.println(" kg");
+
+  delay(1000); // Aguarde 1 segundo antes de fazer a próxima leitura
+}
