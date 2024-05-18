@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculadora de IMC</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        #cabecalho {
+            background-color: #FF5733; /* Cor vermelha modificada */
+            color: white;
+            padding: 20px;
+        }
+
+        #bem-vindo {
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        #formulario {
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        #historico {
+            background-color: #f0f0f0;
+            padding: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="cabecalho">
+        <h1>Calculadora de IMC</h1>
+    </div>
+
+    <div id="bem-vindo">
+        <h2>Bem-vindo à Calculadora de IMC</h2>
+    </div>
+
+    <div id="formulario">
+        <h2>Informe seu nome, altura e peso:</h2>
+
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" placeholder="Digite seu nome" />
+
+        <br>
+
+        <label for="altura">Altura (em metros):</label>
+        <input type="text" id="altura" placeholder="Digite sua altura" />
+
+        <br>
+
+        <label for="peso">Peso (em kg):</label>
+        <input type="text" id="peso" placeholder="Digite seu peso" />
+
+        <br>
+
+        <button onclick="calcularIMC()">Calcular IMC</button>
+        <button onclick="limparInformacoes()">Limpar</button>
+
+        <p>Seu IMC é: <span id="resultado"></span></p>
+    </div>
+
+    <div id="historico">
+        <h2>Histórico de IMC:</h2>
+        <ul id="listaHistorico">
+        </ul>
+    </div>
+
+    <script>
+        function calcularIMC() {
+            var nome = document.getElementById("nome").value;
+            var altura = parseFloat(document.getElementById("altura").value);
+            var peso = parseFloat(document.getElementById("peso").value);
+
+            if (!isNaN(altura) && !isNaN(peso)) {
+                var imc = peso / (altura * altura);
+                var data = new Date();
+                var dataFormatada = data.toLocaleDateString();
+                var resultado = `${nome}: IMC: ${imc.toFixed(2)} (Peso: ${peso} kg) (Calculado em ${dataFormatada})`;
+                document.getElementById("resultado").textContent = imc.toFixed(2);
+
+                var historicoLista = document.getElementById("listaHistorico");
+                var listItem = document.createElement("li");
+                listItem.textContent = resultado;
+                historicoLista.appendChild(listItem);
+            } else {
+                document.getElementById("resultado").textContent = "Preencha altura e peso válidos.";
+            }
+        }
+
+        function limparInformacoes() {
+            document.getElementById("nome").value = "";
+            document.getElementById("altura").value = "";
+            document.getElementById("peso").value = "";
+            document.getElementById("resultado").textContent = "";
+        }
+    </script>
+</body>
+</html>
